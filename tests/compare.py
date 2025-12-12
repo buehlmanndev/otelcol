@@ -124,10 +124,40 @@ def main():
 
     if hec_records != expected:
         print("Mismatch between expected and hec records", file=sys.stderr)
-        print("=== expected ===")
-        print(json.dumps(expected, indent=2, sort_keys=True))
-        print("=== hec ===")
-        print(json.dumps(hec_records, indent=2, sort_keys=True))
+
+        def canonicalize(records):
+            out = []
+            for r in records:
+                key = (
+                    r.get("message"),
+                    json.dumps(r.get("attributes", {}), sort_keys=True, separators=(",", ":")),
+                )
+                out.append(key)
+            return out
+
+        exp_keys = canonicalize(expected)
+        got_keys = canonicalize(hec_records)
+
+        from collections import Counter
+
+        missing = Counter(exp_keys) - Counter(got_keys)
+        unexpected = Counter(got_keys) - Counter(exp_keys)
+
+        if missing:
+            print("Missing records:", file=sys.stderr)
+            for (msg, attrs), count in missing.items():
+                try:
+                    attr_obj = json.loads(attrs)
+                except Exception:
+                    attr_obj = attrs
+                sample = {"message": msg, "attributes": attr_obj}
+                for _ in range(count):
+                    print(json.dumps(sample, indent=2, sort_keys=True), file=sys.stderr)
+        if unexpected:
+            print("Unexpected records:", file=sys.stderr)
+            for (msg, attrs), count in unexpected.items():
+                print(f"- {count}x message='{msg}' attrs={attrs}", file=sys.stderr)
+
         sys.exit(1)
 
     print("Comparison OK (HEC only).")
