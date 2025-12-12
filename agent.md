@@ -15,6 +15,7 @@ Unterstuetzte Log-Formate:
 - **Keine Annahmen**: Verarbeite ausschliesslich die bereitgestellten Test-Log-Beispiele.
 - **Struktur-basiert**: Routing/Parsing orientiert sich an Struktur bzw. vorhandenen Feldern (z.B. JSON vs. KV Layout) – keine inhaltlichen Pattern auf der Log-Message selbst.
 - **Gute Praxis**: Nutze Router + klar getrennte Pipelines; entferne Container-Metadaten; halte Body als reine Message, Attribute als Felder; keine unnoetigen Dateien im Repo; Dokumentation kurz und verfuegbar (README, tests/README, collector/README).
+- **Systemunabhaengig testen**: Vergleiche werden in Containern ausgefuehrt (Python-Slim), keine lokalen Tools wie `jq` noetig; Container-Logs muessen immer sichtbar sein.
 
 ## Erwartetes Ergebnis
 - Eine vollstaendig definierte Operator-Chain pro Log-Typ

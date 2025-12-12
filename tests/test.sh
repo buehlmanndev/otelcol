@@ -13,7 +13,6 @@ if ! docker compose version >/dev/null 2>&1; then
   echo "'docker compose' plugin not found" >&2
   exit 1
 fi
-command -v jq >/dev/null 2>&1 || { echo "jq not found" >&2; exit 1; }
 
 mkdir -p "$OUTPUT_DIR"
 chmod 0777 "$OUTPUT_DIR"
@@ -53,18 +52,69 @@ fi
 ACTUAL_TMP="$(mktemp)"
 EXPECTED_TMP="$(mktemp)"
 
-jq -c '
-  .resourceLogs[].scopeLogs[].logRecords[]
-  | {
-      message: (.body.stringValue // .body // null),
-      attributes: (
-        reduce (.attributes[]? ) as $a ({}; .[$a.key] =
-          ($a.value.stringValue // $a.value.intValue // $a.value.doubleValue // $a.value.boolValue // $a.value.bytesValue // $a.value.arrayValue // $a.value.kvlistValue)
-        )
-      )
-    }
-  ' "$OUTPUT_FILE" | jq -s 'sort_by(.message)' | jq -S >"$ACTUAL_TMP"
-jq -s 'sort_by(.message)' "$EXPECTED_DIR"/*.json | jq -S >"$EXPECTED_TMP"
+docker run --rm \
+  -v "$EXPECTED_DIR":/expected:ro \
+  -v "$OUTPUT_FILE":/output/logs.json:ro \
+  python:3.12-slim \
+  python - <<'PY'
+import json
+import sys
+from pathlib import Path
 
-diff -u "$EXPECTED_TMP" "$ACTUAL_TMP"
+def normalize_output(path: Path):
+    data = json.loads(path.read_text())
+    records = []
+    for rl in data.get("resourceLogs", []):
+        for sl in rl.get("scopeLogs", []):
+            for lr in sl.get("logRecords", []):
+                body = lr.get("body")
+                msg = None
+                if isinstance(body, dict):
+                    msg = body.get("stringValue")
+                    if msg is None and len(body) == 1:
+                        msg = next(iter(body.values()))
+                else:
+                    msg = body
+                attrs = {}
+                for attr in lr.get("attributes", []):
+                    v = attr.get("value", {})
+                    val = (
+                        v.get("stringValue")
+                        if v.get("stringValue") is not None else
+                        v.get("intValue")
+                        if v.get("intValue") is not None else
+                        v.get("doubleValue")
+                        if v.get("doubleValue") is not None else
+                        v.get("boolValue")
+                        if v.get("boolValue") is not None else
+                        v.get("bytesValue")
+                        if v.get("bytesValue") is not None else
+                        v.get("arrayValue")
+                        if v.get("arrayValue") is not None else
+                        v.get("kvlistValue")
+                    )
+                    attrs[attr.get("key")] = val
+                records.append({"message": msg, "attributes": attrs})
+    return sorted(records, key=lambda x: x.get("message") or "")
+
+def load_expected(dir_path: Path):
+    records = []
+    for p in sorted(dir_path.glob("*.json")):
+        records.append(json.loads(p.read_text()))
+    return sorted(records, key=lambda x: x.get("message") or "")
+
+actual = normalize_output(Path("/output/logs.json"))
+expected = load_expected(Path("/expected"))
+
+if actual != expected:
+    print("Mismatch between expected and actual", file=sys.stderr)
+    print("=== expected ===")
+    print(json.dumps(expected, indent=2, sort_keys=True))
+    print("=== actual ===")
+    print(json.dumps(actual, indent=2, sort_keys=True))
+    sys.exit(1)
+
+print("Comparison OK.")
+PY
+
 echo "All tests passed."

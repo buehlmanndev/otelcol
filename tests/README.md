@@ -16,7 +16,7 @@ Docker-only Validierung der Stanza-Pipeline gegen die bereitgestellten Fixtures.
 
 ## Voraussetzungen
 - Docker + Docker Compose Plugin
-- `jq` lokal
+- Vergleich/Parsing laeuft in einem Python-Slim Container (kein lokales `jq` erforderlich)
 
 ## Erfolgskriterium
 - Skript endet mit `All tests passed.` und Exit-Code 0.
