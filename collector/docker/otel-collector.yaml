@@ -30,7 +30,7 @@ receivers:
       # Route by structure: JSON vs KV
       - id: log_router
         type: router
-        default: cleanup_logtag
+        default: parse_plain_level
         routes:
           - expr: 'body matches "^\\s*\\{"'
             output: json_parse
@@ -58,6 +58,24 @@ receivers:
         if: 'attributes.log != nil && attributes.log.level != nil'
         output: cleanup_logtag
         error_mode: continue
+
+
+      # Optionally capture a plain-text log level (non-JSON); keep entry even if it doesn't match
+      - id: parse_plain_level
+        type: regex_parser
+        parse_from: body
+        parse_to: attributes
+        regex: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\s+-\s+(?P<log_level>[A-Z]+)\s'
+        error_mode: continue
+        output: move_plain_level
+
+      - id: move_plain_level
+        type: move
+        from: attributes.log_level
+        to: attributes["log.level"]
+        if: attributes.log_level != nil
+        error_mode: continue
+        output: cleanup_logtag
 
       # Minimal cleanup: remove helper fields
       - id: cleanup_logtag

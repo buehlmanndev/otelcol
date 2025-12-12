@@ -8,6 +8,7 @@
       "k8s.pod.uid": "1111",
       "log.file.name": "1.log",
       "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/multiline-container/1.log",
+      "log.level": "WARN",
       "namespace": "demo-ns",
       "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
       "pod_name": "kv-pod",
