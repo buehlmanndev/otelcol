@@ -1,0 +1,1 @@
+2025-10-13T18:56:09.672485147Z stdout F ts=2025-12-12T09:38:51.227; sev=INFO   ; host=decoder-657bfb768-7qgjv; ver=jbv53-rel-0.77.0-20251112194502; app=/usr/sbin/livenessProbe; pid=1615380; tid=0; src=/usr/sbin/livenessProbe:11; msg="livenessProbe returned liveness all OK"

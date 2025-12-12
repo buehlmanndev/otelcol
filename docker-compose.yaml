@@ -1,0 +1,16 @@
+services:
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./collector/docker/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - ./tests/fixtures:/fixtures:ro
+    environment:
+      - SPLUNK_HEC_URL=http://hec-mock:8088/services/collector
+      - SPLUNK_HEC_TOKEN=changeme
+  hec-mock:
+    image: python:3.12-slim
+    command: ["python", "-m", "http.server", "8088"]
+    working_dir: /srv
+    volumes:
+      - ./tests:/srv:rw
