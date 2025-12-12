@@ -5,176 +5,161 @@ receivers:
     start_at: beginning
     include_file_path: true
     operators:
-      - id: container_input
-        type: container
-        format: containerd
-        add_metadata_from_filepath: true
-        output: pre_unescape_https
+      # --------------------------
+      # 1. UID Extraction
+      # --------------------------
+      - type: add
+        id: set_otelcol_uidextracted_to_false_before
+        field: attributes.otelcol_uidextracted
+        value: false
 
-      - id: pre_unescape_https
-        type: regex_replace
-        field: body
-        regex: "\\\\https"
-        replace_with: "https"
-        if: 'body matches "\\\\https"'
-        output: pre_unescape_comma
+      - id: parse_pod_uid_for_k8sattributes
+        type: regex_parser
+        parse_from: attributes["log.file.path"]
+        parse_to: attributes
+        error_mode: continue
+        regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<uid>[^/]+)/(?P<container_name>[^._]+)/(?P<restart_count>\d+)\.log$'
+        if: attributes["log.file.path"] matches "^/var/log/pods/"
 
-      - id: pre_unescape_comma
-        type: regex_replace
-        field: body
-        regex: "\\\\,"
-        replace_with: ","
-        if: 'body matches "\\\\,"'
-        output: log_router
+      - type: add
+        if: attributes.uid != ""
+        id: set_otelcol_uidextracted_to_true_after
+        field: attributes.otelcol_uidextracted
+        error_mode: continue
+        value: true
 
-      - id: log_router
-        type: router
-        default: cleanup_logtag
-        routes:
-          - expr: 'body matches "^\\s*\\{"'
-            output: json_unescape_https
-          - expr: 'body startsWith "ts="'
-            output: kv_parse
+      - type: move
+        id: move_attributes_uid_to_resource_k8s_pod_uid
+        if: attributes.otelcol_uidextracted == true
+        from: attributes.uid
+        to: resource["k8s.pod.uid"]
 
-      # JSON / ECS-like route
-      - id: json_unescape_https
-        type: regex_replace
-        field: body
-        regex: "\\\\https"
-        replace_with: "https"
-        if: 'body matches "\\\\https"'
-        output: json_unescape_comma
+      - type: move
+        id: move_attributes_restart_count_to_resource_k8s_container_restart_count
+        from: attributes.restart_count
+        to: resource["k8s.container.restart_count"]
 
-      - id: json_unescape_comma
-        type: regex_replace
-        field: body
-        regex: "\\\\,"
-        replace_with: ","
-        if: 'body matches "\\\\,"'
-        output: json_parse
+      # --------------------------
+      # 2. Containerd Prefix Stripping
+      # --------------------------
+      - type: add
+        id: set_otelcol_prefixremoved_to_false_before
+        field: attributes.otelcol_prefixremoved
+        value: false
 
-      - id: json_parse
+      - id: strip_containerd_prefix
+        type: regex_parser
+        parse_from: body
+        error_mode: continue
+        parse_to: attributes
+        regex: ^(?P<paas_time_utc>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z) \w+ (?P<log>.*)$
+        if: attributes["log.file.path"] matches "^/var/log/pods/"
+        timestamp:
+          layout: "2006-01-02T15:04:05.999999999Z"
+          layout_type: gotime
+          parse_from: attributes.paas_time_utc
+
+      - type: add
+        if: body matches "^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z) (stdout|stderr) .*"
+        field: attributes.otelcol_prefixremoved
+        id: set_otelcol_prefixremoved_to_true_after
+        error_mode: continue
+        value: true
+
+      # --------------------------
+      # 3. Multiline Handling
+      # --------------------------
+      - type: add
+        id: set_otelcol_multilined_to_false_before
+        field: attributes.otelcol_multilined
+        value: false
+
+      - id: detect_row_and_recombine_multilined
+        type: recombine
+        combine_field: attributes.log
+        error_mode: continue
+        combine_with: "\n"
+        is_first_entry: attributes.log matches "^(?:ts=)?\\d{4}-\\d{2}-\\d{2}|^{|^[IWE]\\d{4}"
+        max_log_size: 10Mib
+
+      - type: add
+        id: set_otelcol_multilined_to_true_after
+        if: attributes.log matches "^(?:ts=)?\\d{4}-\\d{2}-\\d{2}|^{|^[IWE]\\d{4}"
+        field: attributes.otelcol_multilined
+        error_mode: continue
+        value: true
+
+      # --------------------------
+      # 4. JSON Handling
+      # --------------------------
+      - type: add
+        id: set_otelcol_jsonparsed_to_false
+        field: attributes.otelcol_jsonparsed
+        value: false
+
+      - id: parse_json_log
+        type: json_parser
+        parse_from: attributes.log
+        parse_to: attributes
+        if: attributes.log matches "^\\{"
+        error_mode: continue
+
+      - id: parse_json_ecs
         type: json_parser
         parse_from: body
         parse_to: attributes
-        on_error: drop
-        output: json_move_message
+        if: body matches "^{"
+        error_mode: continue
 
-      - id: json_move_message
+      - id: json_mark_as_parsed
+        type: add
+        field: attributes.otelcol_jsonparsed
+        value: true
+        if: attributes.traceId != nil or attributes.trace_id != nil or attributes.message != nil
+        error_mode: continue
+
+      - id: normalize_traceid
+        type: move
+        from: attributes.traceId
+        to: attributes.trace_id
+        if: attributes.traceId != nil
+        error_mode: continue
+
+      - id: normalize_spanid
+        type: move
+        from: attributes.spanId
+        to: attributes.span_id
+        if: attributes.spanId != nil
+        error_mode: continue
+
+      # --------------------------
+      # 5. Move to body
+      # --------------------------
+      # JSON logs → body = message
+      - id: move_json_message_to_body
         type: move
         from: attributes.message
         to: body
-        if: 'attributes.message != nil'
-        output: json_flatten_log_level
+        if: attributes.otelcol_jsonparsed == true and attributes.message != nil
+        error_mode: continue
 
-      - id: json_flatten_log_level
+      # Non-JSON logs → body = cleaned attributes.log
+      - id: move_nonjson_log_to_body
         type: move
-        from: attributes.log.level
-        to: attributes["log.level"]
-        if: 'attributes.log != nil && attributes.log.level != nil'
-        output: json_flatten_log_logger
-
-      - id: json_flatten_log_logger
-        type: move
-        from: attributes.log.logger
-        to: attributes["log.logger"]
-        if: 'attributes.log != nil && attributes.log.logger != nil'
-        output: json_drop_log_map
-
-      - id: json_drop_log_map
-        type: remove
-        field: attributes.log
-        if: 'attributes.log != nil'
-        output: json_flatten_thread
-
-      - id: json_flatten_thread
-        type: move
-        from: attributes.process.thread.name
-        to: attributes["process.thread.name"]
-        if: 'attributes.process != nil && attributes.process.thread != nil && attributes.process.thread.name != nil'
-        output: json_flatten_pid
-
-      - id: json_flatten_pid
-        type: move
-        from: attributes.process.pid
-        to: attributes["process.pid"]
-        if: 'attributes.process != nil && attributes.process.pid != nil'
-        output: json_drop_process_map
-
-      - id: json_drop_process_map
-        type: remove
-        field: attributes.process
-        if: 'attributes.process != nil'
-        output: cleanup_logtag
-
-      # Key-Value line route
-      - id: kv_parse
-        type: key_value_parser
-        parse_from: body
-        parse_to: attributes
-        delimiter: "="
-        pair_delimiter: ";"
-        on_error: drop
-        output: kv_trim_sev
-
-      - id: kv_trim_sev
-        type: regex_replace
-        field: attributes.sev
-        regex: "\\s+"
-        replace_with: ""
-        if: 'attributes.sev != nil'
-        output: kv_strip_msg
-
-      - id: kv_strip_msg
-        type: regex_replace
-        field: attributes.msg
-        regex: '^\"|\"$'
-        replace_with: ""
-        if: 'attributes.msg != nil'
-        output: kv_move_msg
-
-      - id: kv_move_msg
-        type: move
-        from: attributes.msg
+        from: attributes.log
         to: body
-        if: 'attributes.msg != nil'
-        output: cleanup_logtag
+        if: attributes.otelcol_jsonparsed == false and attributes.log != nil
+        error_mode: continue
 
-      # Common cleanup (applies to all routes and default)
-      - id: cleanup_logtag
-        type: remove
-        field: attributes.logtag
-        if: 'attributes.logtag != nil'
-        output: cleanup_log_file_path
-
-      - id: cleanup_log_file_path
-        type: remove
-        field: attributes["log.file.path"]
-        if: 'attributes["log.file.path"] != nil'
-        output: cleanup_log_file_name
-
-      - id: cleanup_log_file_name
-        type: remove
-        field: attributes["log.file.name"]
-        if: 'attributes["log.file.name"] != nil'
-        output: cleanup_log_iostream
-
-      - id: cleanup_log_iostream
-        type: remove
-        field: attributes["log.iostream"]
-        if: 'attributes["log.iostream"] != nil'
-        output: cleanup_message_attribute
-
-      - id: cleanup_message_attribute
-        type: remove
-        field: attributes.message
-        if: 'attributes.message != nil'
-        output: cleanup_msg_attribute
-
-      - id: cleanup_msg_attribute
-        type: remove
-        field: attributes.msg
-        if: 'attributes.msg != nil'
+      # --------------------------
+      # 6. Optional: Clean up log field
+      # --------------------------
+      - id: mark_log_as_removed
+        type: add
+        field: attributes.log
+        value: "striped_to_free_lic_by_otcl"
+        error_mode: continue
+        if: attributes.otelcol_jsonparsed == true
 
 processors:
   batch: {}
