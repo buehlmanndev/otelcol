@@ -26,7 +26,6 @@ Jeder Log-Typ wird isoliert getestet.
 ```
 .
 ├── collector/
-│   ├── config/                     # Platzhalter pro Log-Typ (derzeit nicht verdrahtet)
 │   └── docker/otel-collector.yaml  # Aktuelle, getestete Pipeline
 ├── tests/
 │   ├── fixtures/
@@ -69,10 +68,9 @@ Jeder Log-Typ wird isoliert getestet.
 - Keine versteckte Logik
 
 ## Aktueller Pipeline-Stand (docker/otel-collector.yaml)
-- `receiver.filelog`: container parser (containerd), Escape-Fixes fuer verschachteltes ECS-Beispiel, JSON-Parsing, KV-Parsing fuer line-Logs, Feld-Flattening und Metadata-Removal.
+- `receiver.filelog`: container parser (containerd) -> router (strukturbasiert: JSON vs. KV) -> branch-spezifische Parser -> gemeinsame Cleanup-Phase (Removal von Container-Metadaten).
 - `exporter.file`: schreibt nach `/output/logs.json` (gemountet auf `tests/output/logs.json`).
 - `processor.batch`: Standard-Batching.
 
 ## Naechste Schritte
 1. Splunk HEC Exporter einhaengen und Test-Runner erweitern, um HEC-Payload zu validieren.
-2. Optional: pro Log-Typ separate Config-Files aus `collector/config/*.yaml` verdrahten.

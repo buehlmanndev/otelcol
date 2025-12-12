@@ -7,11 +7,9 @@
 
 ## Pipeline (kurz)
 - `container` parser (format: containerd, ohne Pfad-Metadaten)
-- Escape-Fixes fuer das verschachtelte ECS-Beispiel
-- `json_parser` fuer JSON Bodies
-- `key_value_parser` fuer KV-Line-Logs (`ts=...; sev=...; ...; msg="..."`)
-- Normalisierung: Message nach `body`, Metadaten nach Attributes, Entfernen von Container-Metadaten
+- `router` mit strukturellem Split:
+  - JSON/ECS-Route: Escape-Fixes, `json_parser`, Flatten von `log.*`/`process.*`, Message nach `body`
+  - KV-Route: `key_value_parser` fuer `ts=...; sev=...; ...; msg="..."`, Cleanup/Trim, Message nach `body`
+  - Default: direkte Weiterleitung in gemeinsame Cleanup
+- Gemeinsames Cleanup: Entfernt Container-Metadaten (`log.*`, `logtag`) und Restfelder (`message`/`msg` nach Move)
 - `batch` processor, `file` exporter
-
-## Per-Log-Typ Config Platzhalter
-`collector/config/*.yaml` sind reserviert fuer spaetere, dedizierte Pipelines je Log-Format.

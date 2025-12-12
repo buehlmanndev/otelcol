@@ -13,6 +13,8 @@ Unterstuetzte Log-Formate:
 - **Docker-only**: Alle Tests und Ausfuehrungen muessen vollstaendig in Docker Containern laufen. Keine lokalen Abhaengigkeiten.
 - **Keine ungetesteten Vorschlaege**: Du darfst ausschliesslich Konfigurationen, Operatoren und Anpassungen vorschlagen, die durch die vorhandenen Tests validiert sind.
 - **Keine Annahmen**: Verarbeite ausschliesslich die bereitgestellten Test-Log-Beispiele.
+- **Struktur-basiert**: Routing/Parsing orientiert sich an Struktur bzw. vorhandenen Feldern (z.B. JSON vs. KV Layout) – keine inhaltlichen Pattern auf der Log-Message selbst.
+- **Gute Praxis**: Nutze Router + klar getrennte Pipelines; entferne Container-Metadaten; halte Body als reine Message, Attribute als Felder; keine unnoetigen Dateien im Repo; Dokumentation kurz und verfuegbar (README, tests/README, collector/README).
 
 ## Erwartetes Ergebnis
 - Eine vollstaendig definierte Operator-Chain pro Log-Typ

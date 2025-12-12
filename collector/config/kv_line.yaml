@@ -1,8 +1,0 @@
-# kv_line.yaml
-# Platzhalter: Stanza Operator Chain kommt hier rein.
-# Diese Datei wird von Tests referenziert.
-receivers: {}
-processors: {}
-exporters: {}
-service:
-  pipelines: {}
