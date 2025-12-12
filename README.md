@@ -1,21 +1,19 @@
 # OpenTelemetry Collector fuer Containerd Logs zu Splunk HEC
 
 ## Zielsetzung
-Dieses Projekt implementiert einen testgetriebenen OpenTelemetry Collector, der Kubernetes Containerd Logs verarbeitet und normiert an Splunk via HTTP Event Collector (HEC) weiterleitet.
-
-Der Fokus liegt auf reproduzierbaren, vollautomatisierten Tests innerhalb von Docker Containern.
+Testgetriebener OpenTelemetry Collector, der Kubernetes Containerd Logs mit Stanza Operators normiert. Fokus: vollautomatische, dockerisierte Tests.
 
 ## Relevante Doku
 - Stanza Operators (opentelemetry-collector-contrib): https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/pkg/stanza/docs/operators
 
 ## Architekturuebersicht
-- **Input**: Containerd file-basierte Logs
-- **Processing**: Stanza Operator Chains (pro Log-Format)
-- **Output**: Splunk HEC kompatibles Event-Format
+- **Input**: Containerd file-basierte Logs (CRI Layout)
+- **Processing**: Stanza Operator Chain (container parser, json/kv parsing, Flattening)
+- **Output**: aktuell File-Exporter (tests/output/logs.json) als golden source; spaeter Splunk HEC
 
-Splunk Zielmodell:
-- Log Message ausschliesslich als Message (Event Body)
-- Saemtliche Metadaten und extrahierte Felder als Attribute
+Zielmodell:
+- Body/Event = reine Log Message
+- Alle Metadaten als Attributes/Fields
 
 ## Unterstuetzte Log-Formate
 1. Key-Value Line Logs
@@ -28,52 +26,41 @@ Jeder Log-Typ wird isoliert getestet.
 ```
 .
 ├── collector/
-│   ├── config/
-│   │   ├── kv_line.yaml
-│   │   ├── spring_ecs_flat.yaml
-│   │   └── ecs_nested.yaml
-│   └── docker/
-│       └── otel-collector.yaml
+│   ├── config/                     # Platzhalter pro Log-Typ (derzeit nicht verdrahtet)
+│   └── docker/otel-collector.yaml  # Aktuelle, getestete Pipeline
 ├── tests/
 │   ├── fixtures/
-│   │   ├── kv_line.log              # Platzhalter
-│   │   ├── spring_ecs_flat.json     # Platzhalter
-│   │   └── ecs_nested.json          # Platzhalter
+│   │   ├── kv_line.log
+│   │   ├── spring_ecs_flat.json
+│   │   └── ecs_nested.json
 │   ├── expected/
 │   │   ├── kv_line.json
 │   │   ├── spring_ecs_flat.json
 │   │   └── ecs_nested.json
-│   └── test.sh
+│   ├── output/                     # File-Exporter Ziel (gitignored, .gitkeep)
+│   └── test.sh                     # Docker-basierter Test-Runner
 ├── docker-compose.yaml
 ├── agent.md
 └── README.md
 ```
 
 ## Testkonzept
-- Jeder Test:
-  - Mountet ein Beispiel-Logfile
-  - Startet den Collector mit spezifischer Operator-Chain
-  - Faengt den Output ab (Mock-HEC oder JSON Export)
-  - Vergleicht gegen erwartetes Resultat
+- Docker-only: `./tests/test.sh` startet `docker compose`, sammelt OTLP-File-Export (`tests/output/logs.json`), normalisiert per `jq`, diff gegen `tests/expected/*.json`.
+- Fixtures sind bindend; Operator-Chain verarbeitet ausschliesslich diese Beispiele.
+- File-Exporter dient als Golden Master. HEC-Anbindung kann spaeter auf Basis desselben Outputs erfolgen.
 
-- Tests laufen ausschliesslich via:
+### Voraussetzungen
+- Docker + Docker Compose Plugin
+- `jq` lokal (Test-Script nutzt es ausserhalb des Containers)
+
+### Ausfuehrung
 ```
-docker compose up --build --abort-on-container-exit
+./tests/test.sh
 ```
 
-## Platzhalter fuer Log-Beispiele
-Die folgenden Dateien muessen durch reale Beispiele ersetzt werden:
-
-- `tests/fixtures/kv_line.log`
-- `tests/fixtures/spring_ecs_flat.json`
-- `tests/fixtures/ecs_nested.json`
-
-Die Struktur dieser Dateien definiert verbindlich die Operator-Logik.
-
-## Splunk HEC Annahmen
-- Token, Endpoint und Index werden via Environment Variablen gesetzt
-- Im Testbetrieb wird ein Mock oder Dry-Run Export verwendet
-- Kein direkter Write in produktives Splunk waehrend Tests
+### Erwartete Ergebnisse
+- Exit-Code 0, Meldung `All tests passed.`
+- Ausgegebene Datei `tests/output/logs.json` (OTLP JSON vom File-Exporter)
 
 ## Designprinzipien
 - Deterministisch
@@ -81,8 +68,11 @@ Die Struktur dieser Dateien definiert verbindlich die Operator-Logik.
 - Keine impliziten Defaults
 - Keine versteckte Logik
 
+## Aktueller Pipeline-Stand (docker/otel-collector.yaml)
+- `receiver.filelog`: container parser (containerd), Escape-Fixes fuer verschachteltes ECS-Beispiel, JSON-Parsing, KV-Parsing fuer line-Logs, Feld-Flattening und Metadata-Removal.
+- `exporter.file`: schreibt nach `/output/logs.json` (gemountet auf `tests/output/logs.json`).
+- `processor.batch`: Standard-Batching.
+
 ## Naechste Schritte
-1. Log-Beispiele einfuegen
-2. Erwartete Output-JSONs definieren
-3. Operator-Chains implementieren
-4. Tests iterativ gruenden lassen
+1. Splunk HEC Exporter einhaengen und Test-Runner erweitern, um HEC-Payload zu validieren.
+2. Optional: pro Log-Typ separate Config-Files aus `collector/config/*.yaml` verdrahten.

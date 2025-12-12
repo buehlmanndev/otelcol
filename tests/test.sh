@@ -1,6 +1,50 @@
-#!/usr/bin/env sh
-set -eu
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "Platzhalter Test Runner."
-echo "TODO: Start collector, capture output, compare gegen tests/expected/*.json"
-exit 1
+ROOT_DIR="$(cd -- "$(dirname "$0")/.." && pwd)"
+COMPOSE_FILE="$ROOT_DIR/docker-compose.yaml"
+EXPECTED_DIR="$ROOT_DIR/tests/expected"
+OUTPUT_DIR="$ROOT_DIR/tests/output"
+OUTPUT_FILE="$OUTPUT_DIR/logs.json"
+
+mkdir -p "$OUTPUT_DIR"
+chmod 0777 "$OUTPUT_DIR"
+rm -f "$OUTPUT_FILE"
+
+# Start collector stack
+docker compose -f "$COMPOSE_FILE" down -v --remove-orphans >/dev/null 2>&1 || true
+docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+
+# Wait for the collector to flush output
+for _ in $(seq 1 20); do
+  if [ -s "$OUTPUT_FILE" ]; then
+    break
+  fi
+  sleep 1
+done
+
+docker compose -f "$COMPOSE_FILE" down -v --remove-orphans
+
+if [ ! -s "$OUTPUT_FILE" ]; then
+  echo "collector output not found at $OUTPUT_FILE" >&2
+  exit 1
+fi
+
+ACTUAL_TMP="$(mktemp)"
+EXPECTED_TMP="$(mktemp)"
+
+jq -c '
+  .resourceLogs[].scopeLogs[].logRecords[]
+  | {
+      message: (.body.stringValue // .body // null),
+      attributes: (
+        reduce (.attributes[]? ) as $a ({}; .[$a.key] =
+          ($a.value.stringValue // $a.value.intValue // $a.value.doubleValue // $a.value.boolValue // $a.value.bytesValue // $a.value.arrayValue // $a.value.kvlistValue)
+        )
+      )
+    }
+  ' "$OUTPUT_FILE" | jq -s 'sort_by(.message)' | jq -S >"$ACTUAL_TMP"
+jq -s 'sort_by(.message)' "$EXPECTED_DIR"/*.json | jq -S >"$EXPECTED_TMP"
+
+diff -u "$EXPECTED_TMP" "$ACTUAL_TMP"
+echo "All tests passed."

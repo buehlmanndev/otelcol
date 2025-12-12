@@ -1,6 +1,12 @@
 {
-  "message": "TODO",
+  "message": "{\"request\": {\"uri\": https://192.198.47.113:40504/actuator/health/readiness, \"payload\": {}}, \"response\": {\"code\": \"200 OK\", \"payload\": {}}}",
   "attributes": {
-    "TODO": true
+    "@timestamp": "2025-12-12T07:22:59.055427052Z",
+    "log.level": "TRACE",
+    "log.logger": "ch.company.application.commons.payload.logging.webflux.PayloadLoggingWebfluxFilter",
+    "process.pid": 1,
+    "process.thread.name": "boundedElastic-10",
+    "traceId": "1d8a53fa89227cab1459249dc278e8d3",
+    "spanId": "996d4985a9e5821d"
   }
 }

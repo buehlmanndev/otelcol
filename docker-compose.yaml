@@ -5,6 +5,7 @@ services:
     volumes:
       - ./collector/docker/otel-collector.yaml:/etc/otelcol/config.yaml:ro
       - ./tests/fixtures:/fixtures:ro
+      - ./tests/output:/output:rw
     environment:
       - SPLUNK_HEC_URL=http://hec-mock:8088/services/collector
       - SPLUNK_HEC_TOKEN=changeme

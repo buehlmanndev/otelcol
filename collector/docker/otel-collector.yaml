@@ -1,2 +1,102 @@
-# Platzhalter fuer Collector Basiskonfiguration (Docker Runtime)
-# Hier wird spaeter z.B. der Receiver fuer filelog + operator chain eingebunden.
+receivers:
+  filelog:
+    include:
+      - /fixtures/*.log
+      - /fixtures/*.json
+    start_at: beginning
+    operators:
+      - type: container
+        format: containerd
+        add_metadata_from_filepath: false
+      - type: regex_replace
+        field: body
+        regex: "\\\\https"
+        replace_with: "https"
+        if: 'body matches "\\\\https"'
+      - type: regex_replace
+        field: body
+        regex: "\\\\,"
+        replace_with: ","
+        if: 'body matches "\\\\,"'
+      - type: json_parser
+        parse_from: body
+        parse_to: attributes
+        if: 'body matches "^\\s*\\{"'
+      - type: key_value_parser
+        parse_from: body
+        parse_to: attributes
+        delimiter: "="
+        pair_delimiter: ";"
+        if: 'body startsWith "ts="'
+      - type: move
+        from: attributes.msg
+        to: body
+        if: 'attributes.msg != nil'
+      - type: move
+        from: attributes.message
+        to: body
+        if: 'attributes.message != nil'
+      - type: regex_replace
+        field: attributes.sev
+        regex: "\\s+"
+        replace_with: ""
+        if: 'attributes.sev != nil'
+      - type: regex_replace
+        field: attributes.msg
+        regex: '^\"|\"$'
+        replace_with: ""
+        if: 'attributes.msg != nil'
+      - type: move
+        from: attributes.log.level
+        to: attributes["log.level"]
+        if: 'attributes.log != nil && attributes.log.level != nil'
+      - type: move
+        from: attributes.log.logger
+        to: attributes["log.logger"]
+        if: 'attributes.log != nil && attributes.log.logger != nil'
+      - type: remove
+        field: attributes.log
+        if: 'attributes.log != nil'
+      - type: move
+        from: attributes.process.thread.name
+        to: attributes["process.thread.name"]
+        if: 'attributes.process != nil && attributes.process.thread != nil && attributes.process.thread.name != nil'
+      - type: move
+        from: attributes.process.pid
+        to: attributes["process.pid"]
+        if: 'attributes.process != nil && attributes.process.pid != nil'
+      - type: remove
+        field: attributes.process
+        if: 'attributes.process != nil'
+      - type: remove
+        field: attributes.msg
+        if: 'attributes.msg != nil'
+      - type: remove
+        field: attributes.message
+        if: 'attributes.message != nil'
+      - type: remove
+        field: attributes["log.file.path"]
+        if: 'attributes["log.file.path"] != nil'
+      - type: remove
+        field: attributes["log.file.name"]
+        if: 'attributes["log.file.name"] != nil'
+      - type: remove
+        field: attributes["log.iostream"]
+        if: 'attributes["log.iostream"] != nil'
+      - type: remove
+        field: attributes.logtag
+        if: 'attributes.logtag != nil'
+
+processors:
+  batch: {}
+
+exporters:
+  file:
+    path: /output/logs.json
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [file]

@@ -19,6 +19,7 @@ Unterstuetzte Log-Formate:
 - Normalisierung auf folgendes Zielmodell:
   - `body` bzw. Splunk `event`: ausschliesslich die eigentliche Log Message
   - Alle weiteren Felder als Attribute bzw. Splunk Fields
+- sämtliche Interaktionen mit dem Repo sind in kurzen & knakigen readme (untereinander verlinkt) beschrieben. Beschreibung in Deutch, CH Rechtschreibung.
 
 ## Teststrategie
 - Verwende den offiziellen OpenTelemetry Collector Contrib Docker Image
@@ -34,7 +35,7 @@ Unterstuetzte Log-Formate:
   - das Schema vom erwarteten Zielmodell abweicht
 
 ## Platzhalter fuer Testfaelle
-Die folgenden Dateien werden spaeter mit konkreten Beispielen befuellt und duerfen nicht veraendert werden:
+Die folgenden Dateien enthalten deine Testfälle:
 
 - `tests/fixtures/kv_line.log`
 - `tests/fixtures/spring_ecs_flat.json`
