@@ -9,6 +9,25 @@ def normalize_output(path: Path) -> List[Dict[str, Any]]:
     data = json.loads(path.read_text())
     records = []
     for rl in data.get("resourceLogs", []):
+        resource_attrs = {}
+        for attr in rl.get("resource", {}).get("attributes", []):
+            v = attr.get("value", {})
+            val = (
+                v.get("stringValue")
+                if v.get("stringValue") is not None
+                else v.get("intValue")
+                if v.get("intValue") is not None
+                else v.get("doubleValue")
+                if v.get("doubleValue") is not None
+                else v.get("boolValue")
+                if v.get("boolValue") is not None
+                else v.get("bytesValue")
+                if v.get("bytesValue") is not None
+                else v.get("arrayValue")
+                if v.get("arrayValue") is not None
+                else v.get("kvlistValue")
+            )
+            resource_attrs[attr.get("key")] = val
         for sl in rl.get("scopeLogs", []):
             for lr in sl.get("logRecords", []):
                 body = lr.get("body")
@@ -38,7 +57,10 @@ def normalize_output(path: Path) -> List[Dict[str, Any]]:
                         else v.get("kvlistValue")
                     )
                     attrs[attr.get("key")] = val
-                records.append({"message": msg, "attributes": attrs})
+                merged = {}
+                merged.update(resource_attrs)
+                merged.update(attrs)
+                records.append({"message": msg, "attributes": merged})
     return sorted(records, key=lambda x: x.get("message") or "")
 
 

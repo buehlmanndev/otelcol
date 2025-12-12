@@ -28,10 +28,7 @@ Jeder Log-Typ wird isoliert getestet.
 ├── collector/
 │   └── docker/otel-collector.yaml  # Aktuelle, getestete Pipeline
 ├── tests/
-│   ├── fixtures/
-│   │   ├── kv_line.log
-│   │   ├── spring_ecs_flat.json
-│   │   └── ecs_nested.json
+│   ├── fixtures/var/log/pods/...    # k8s Containerd Pfadlayout (Namespace_Pod_UID/Container/Restart.log)
 │   ├── expected/
 │   │   ├── kv_line.json
 │   │   ├── spring_ecs_flat.json
@@ -44,7 +41,7 @@ Jeder Log-Typ wird isoliert getestet.
 ```
 
 ## Testkonzept
-- Docker-only: `./tests/test.sh` startet `docker compose`, sammelt OTLP-File-Export (`tests/output/logs.json`) und HEC-Mock (`tests/output/hec.ndjson`), normalisiert/vergleicht im `python:3.12-slim` Container gegen `tests/expected/*.json`.
+- Docker-only: `./tests/test.sh` startet `docker compose`, sammelt OTLP-File-Export (`tests/output/logs.json`) und HEC-Mock (`tests/output/hec.json`), normalisiert/vergleicht im `python:3.12-slim` Container gegen `tests/expected/*.json` (inkl. k8s Metadata aus Pfad).
 - Fixtures sind bindend; Operator-Chain verarbeitet ausschliesslich diese Beispiele.
 - File-Exporter dient als Golden Master; HEC wird parallel verifiziert.
 

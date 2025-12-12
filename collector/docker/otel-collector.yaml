@@ -1,14 +1,30 @@
 receivers:
   filelog:
     include:
-      - /fixtures/*.log
-      - /fixtures/*.json
+      - /var/log/pods/*/*/*.log
     start_at: beginning
+    include_file_path: true
     operators:
       - id: container_input
         type: container
         format: containerd
-        add_metadata_from_filepath: false
+        add_metadata_from_filepath: true
+        output: pre_unescape_https
+
+      - id: pre_unescape_https
+        type: regex_replace
+        field: body
+        regex: "\\\\https"
+        replace_with: "https"
+        if: 'body matches "\\\\https"'
+        output: pre_unescape_comma
+
+      - id: pre_unescape_comma
+        type: regex_replace
+        field: body
+        regex: "\\\\,"
+        replace_with: ","
+        if: 'body matches "\\\\,"'
         output: log_router
 
       - id: log_router
