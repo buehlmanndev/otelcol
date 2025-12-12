@@ -23,14 +23,14 @@ receivers:
       - id: parse_pod_path
         type: regex_parser
         parse_from: attributes["log.file.path"]
-        parse_to: attributes.k8s
+        parse_to: attributes
         regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<pod_uid>[^/]+)/(?P<container_name>[^._]+)/(?P<restart_count>\d+)\.log$'
         error_mode: continue
 
       # Route by structure: JSON vs KV
       - id: log_router
         type: router
-        default: kv_parse
+        default: cleanup_logtag
         routes:
           - expr: 'body matches "^\\s*\\{"'
             output: json_parse
@@ -58,14 +58,6 @@ receivers:
         if: 'attributes.log != nil && attributes.log.level != nil'
         output: cleanup_logtag
         error_mode: continue
-
-      # KV route: parse attributes, keep body untouched
-      - id: kv_parse
-        type: move
-        from: attributes.log
-        to: body
-        error_mode: continue
-        output: cleanup_logtag
 
       # Minimal cleanup: remove helper fields
       - id: cleanup_logtag
