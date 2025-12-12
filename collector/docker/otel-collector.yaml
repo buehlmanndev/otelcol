@@ -11,7 +11,7 @@ receivers:
         parse_from: body
         parse_to: attributes
         regex: '^(?P<paas_time_utc>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)'
-        on_error: drop
+        error_mode: continue
 
       # Strip containerd envelope and keep filepath metadata
       - id: container_cri
@@ -25,13 +25,7 @@ receivers:
         parse_from: attributes["log.file.path"]
         parse_to: attributes.k8s
         regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<pod_uid>[^/]+)/(?P<container_name>[^._]+)/(?P<restart_count>\d+)\.log$'
-        on_error: drop
-
-      - id: copy_namespace_for_expected
-        type: copy
-        from: attributes["k8s.namespace.name"]
-        to: attributes.namespace
-        if: attributes["k8s.namespace.name"] != nil
+        error_mode: continue
 
       # Route by structure: JSON vs KV
       - id: log_router
@@ -46,7 +40,7 @@ receivers:
         type: json_parser
         parse_from: body
         parse_to: attributes
-        on_error: drop
+        error_mode: continue
         output: json_move_message
 
       - id: json_move_message
@@ -55,6 +49,7 @@ receivers:
         to: body
         if: 'attributes.message != nil'
         output: json_flatten_log_level
+        error_mode: continue
 
       - id: json_flatten_log_level
         type: move
@@ -62,31 +57,14 @@ receivers:
         to: attributes["log.level"]
         if: 'attributes.log != nil && attributes.log.level != nil'
         output: cleanup_logtag
+        error_mode: continue
 
       # KV route: parse attributes, keep body untouched
       - id: kv_parse
-        type: key_value_parser
-        parse_from: body
-        parse_to: attributes
-        delimiter: "="
-        pair_delimiter: ";"
-        on_error: drop
-        output: kv_trim_sev
-
-      - id: kv_trim_sev
-        type: regex_replace
-        field: attributes.sev
-        regex: "\\s+"
-        replace_with: ""
-        if: 'attributes.sev != nil'
-        output: kv_strip_msg
-
-      - id: kv_strip_msg
-        type: regex_replace
-        field: attributes.msg
-        regex: '^\"|\"$'
-        replace_with: ""
-        if: 'attributes.msg != nil'
+        type: move
+        from: attributes.log
+        to: body
+        error_mode: continue
         output: cleanup_logtag
 
       # Minimal cleanup: remove helper fields
@@ -95,23 +73,21 @@ receivers:
         field: attributes.logtag
         if: 'attributes.logtag != nil'
         output: cleanup_log_iostream
+        error_mode: continue
 
       - id: cleanup_log_iostream
         type: remove
         field: attributes["log.iostream"]
         if: 'attributes["log.iostream"] != nil'
         output: cleanup_message_attribute
+        error_mode: continue
 
       - id: cleanup_message_attribute
         type: remove
         field: attributes.message
         if: 'attributes.message != nil'
-        output: cleanup_msg_attribute
+        error_mode: continue
 
-      - id: cleanup_msg_attribute
-        type: remove
-        field: attributes.msg
-        if: 'attributes.msg != nil'
 
 processors:
   batch: {}
