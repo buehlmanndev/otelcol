@@ -12,4 +12,5 @@
   - KV-Route: `key_value_parser` fuer `ts=...; sev=...; ...; msg="..."`, Cleanup/Trim, Message nach `body`
   - Default: direkte Weiterleitung in gemeinsame Cleanup
 - Gemeinsames Cleanup: Entfernt Container-Metadaten (`log.*`, `logtag`) und Restfelder (`message`/`msg` nach Move)
-- `batch` processor, `file` exporter
+- `batch` processor
+- Exporte: `file` (Golden Master) und `splunk_hec` (Mock)

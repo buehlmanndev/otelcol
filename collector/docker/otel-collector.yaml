@@ -166,10 +166,15 @@ processors:
 exporters:
   file:
     path: /output/logs.json
+  splunk_hec:
+    endpoint: ${SPLUNK_HEC_URL}
+    token: ${SPLUNK_HEC_TOKEN}
+    disable_compression: true
+    source: "otelcol"
 
 service:
   pipelines:
     logs:
       receivers: [filelog]
       processors: [batch]
-      exporters: [file]
+      exporters: [file, splunk_hec]

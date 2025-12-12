@@ -6,13 +6,15 @@ Docker-only Validierung der Stanza-Pipeline gegen die bereitgestellten Fixtures.
 ## Ablauf
 - `./tests/test.sh`
   - startet `docker compose` mit Collector (filelog + Stanza) und HEC-Mock
-  - Collector exportiert OTLP-Logs als JSON nach `tests/output/logs.json`
-  - `jq` normalisiert die Records (`message` + `attributes`) und vergleicht mit `tests/expected/*.json`
+  - Collector exportiert:
+    - OTLP-Logs als JSON nach `tests/output/logs.json` (File-Exporter)
+    - HEC-Events an den Mock (`tests/output/hec.ndjson`)
+  - Normalisierung/ Vergleich erfolgen in einem `python:3.12-slim` Container gegen `tests/expected/*.json`
 
 ## Artefakte
 - `tests/fixtures/`: Input-Logs (Containerd Layout)
 - `tests/expected/`: Erwartete, normalisierte Records (Golden Master)
-- `tests/output/`: Laufzeit-Output des File-Exporters (gitignored, .gitkeep bleibt)
+- `tests/output/`: Laufzeit-Output des File-Exporters und HEC-Mock (gitignored, .gitkeep bleibt)
 
 ## Voraussetzungen
 - Docker + Docker Compose Plugin

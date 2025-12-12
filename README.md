@@ -44,13 +44,13 @@ Jeder Log-Typ wird isoliert getestet.
 ```
 
 ## Testkonzept
-- Docker-only: `./tests/test.sh` startet `docker compose`, sammelt OTLP-File-Export (`tests/output/logs.json`), normalisiert per `jq`, diff gegen `tests/expected/*.json`.
+- Docker-only: `./tests/test.sh` startet `docker compose`, sammelt OTLP-File-Export (`tests/output/logs.json`) und HEC-Mock (`tests/output/hec.ndjson`), normalisiert/vergleicht im `python:3.12-slim` Container gegen `tests/expected/*.json`.
 - Fixtures sind bindend; Operator-Chain verarbeitet ausschliesslich diese Beispiele.
-- File-Exporter dient als Golden Master. HEC-Anbindung kann spaeter auf Basis desselben Outputs erfolgen.
+- File-Exporter dient als Golden Master; HEC wird parallel verifiziert.
 
 ### Voraussetzungen
 - Docker + Docker Compose Plugin
-- `jq` lokal (Test-Script nutzt es ausserhalb des Containers)
+- Keine lokalen Parser-Tools noetig; Vergleich laeuft in Containern
 
 ### Ausfuehrung
 ```
@@ -59,7 +59,7 @@ Jeder Log-Typ wird isoliert getestet.
 
 ### Erwartete Ergebnisse
 - Exit-Code 0, Meldung `All tests passed.`
-- Ausgegebene Datei `tests/output/logs.json` (OTLP JSON vom File-Exporter)
+- Ausgegebene Dateien unter `tests/output/` (OTLP JSON + HEC NDJSON)
 
 ## Designprinzipien
 - Deterministisch
@@ -70,7 +70,8 @@ Jeder Log-Typ wird isoliert getestet.
 ## Aktueller Pipeline-Stand (docker/otel-collector.yaml)
 - `receiver.filelog`: container parser (containerd) -> router (strukturbasiert: JSON vs. KV) -> branch-spezifische Parser -> gemeinsame Cleanup-Phase (Removal von Container-Metadaten).
 - `exporter.file`: schreibt nach `/output/logs.json` (gemountet auf `tests/output/logs.json`).
+- `exporter.splunk_hec`: sendet an HEC-Mock (http://hec-mock:8088/services/collector).
 - `processor.batch`: Standard-Batching.
 
 ## Naechste Schritte
-1. Splunk HEC Exporter einhaengen und Test-Runner erweitern, um HEC-Payload zu validieren.
+1. Optional: Ressource-Attribute anreichern (k8s metadata) und in HEC-Tests reflektieren.
