@@ -1,29 +1,56 @@
 {
-  "message": "Starting product enrichment - product_id=16350",
   "attributes": {
+    "@timestamp": "2025-12-12T08:30:57.307474611Z",
+    "ecs.version": "8.11",
+    "k8s": {
+      "values": [
+        {
+          "key": "pod_name",
+          "value": {
+            "stringValue": "spring-pod"
+          }
+        },
+        {
+          "key": "pod_uid",
+          "value": {
+            "stringValue": "2222"
+          }
+        },
+        {
+          "key": "container_name",
+          "value": {
+            "stringValue": "spring-container"
+          }
+        },
+        {
+          "key": "restart_count",
+          "value": {
+            "stringValue": "0"
+          }
+        },
+        {
+          "key": "namespace",
+          "value": {
+            "stringValue": "demo-ns"
+          }
+        }
+      ]
+    },
+    "k8s.container.name": "spring-container",
+    "k8s.container.restart_count": "0",
     "k8s.namespace.name": "demo-ns",
     "k8s.pod.name": "spring-pod",
     "k8s.pod.uid": "2222",
-    "k8s.container.name": "spring-container",
-    "k8s.container.restart_count": "0",
-    "@timestamp": "2025-12-12T08:30:57.307474611Z",
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_spring-pod_2222/spring-container/0.log",
     "log.level": "INFO",
+    "log.logger": "ch.company.modules.enricher.Enricher",
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
     "process.pid": 1,
     "process.thread.name": "org.springframework.kafka.KafkaListenerEndpointContainer#1-0-C-1",
     "service.version": "1.77.1-SNAPSHOT",
-    "log.logger": "ch.company.modules.enricher.Enricher",
-    "traceId": "a51b16cbc1785473baf33a86d84af7b5",
     "spanId": "b7e103b8ce906a2d",
-    "ecs.version": "8.11",
-    "container_name": "spring-container",
-    "log.file.name": "0.log",
-    "log.file.path": "/var/log/pods/demo-ns_spring-pod_2222/spring-container/0.log",
-    "namespace": "demo-ns",
-    "otelcol_jsonparsed": false,
-    "otelcol_multilined": false,
-    "otelcol_prefixremoved": true,
-    "otelcol_uidextracted": true,
-    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-    "pod_name": "spring-pod"
-  }
+    "traceId": "a51b16cbc1785473baf33a86d84af7b5"
+  },
+  "message": "Starting product enrichment - product_id=16350"
 }

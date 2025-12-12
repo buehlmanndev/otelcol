@@ -1,27 +1,86 @@
 {
-  "message": "{\"request\": {\"uri\": https://192.198.47.113:40504/actuator/health/readiness, \"payload\": {}}, \"response\": {\"code\": \"200 OK\", \"payload\": {}}}",
   "attributes": {
-    "container_name": "ecs-container",
+    "@timestamp": "2025-12-12T07:22:59.055427052Z",
+    "k8s": {
+      "values": [
+        {
+          "key": "restart_count",
+          "value": {
+            "stringValue": "0"
+          }
+        },
+        {
+          "key": "namespace",
+          "value": {
+            "stringValue": "demo-ns"
+          }
+        },
+        {
+          "key": "pod_name",
+          "value": {
+            "stringValue": "ecs-pod"
+          }
+        },
+        {
+          "key": "pod_uid",
+          "value": {
+            "stringValue": "3333"
+          }
+        },
+        {
+          "key": "container_name",
+          "value": {
+            "stringValue": "ecs-container"
+          }
+        }
+      ]
+    },
+    "k8s.container.name": "ecs-container",
     "k8s.container.restart_count": "0",
-    "k8s.pod.uid": "3333",
-    "log.file.name": "0.log",
-    "log.file.path": "/var/log/pods/demo-ns_ecs-pod_3333/ecs-container/0.log",
-    "namespace": "demo-ns",
-    "otelcol_jsonparsed": false,
-    "otelcol_multilined": false,
-    "otelcol_prefixremoved": true,
-    "otelcol_uidextracted": true,
-    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-    "pod_name": "ecs-pod",
     "k8s.namespace.name": "demo-ns",
     "k8s.pod.name": "ecs-pod",
-    "k8s.container.name": "ecs-container",
-    "@timestamp": "2025-12-12T07:22:59.055427052Z",
+    "k8s.pod.uid": "3333",
+    "log": {
+      "values": [
+        {
+          "key": "logger",
+          "value": {
+            "stringValue": "ch.company.application.commons.payload.logging.webflux.PayloadLoggingWebfluxFilter"
+          }
+        }
+      ]
+    },
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_ecs-pod_3333/ecs-container/0.log",
     "log.level": "TRACE",
-    "log.logger": "ch.company.application.commons.payload.logging.webflux.PayloadLoggingWebfluxFilter",
-    "process.pid": 1,
-    "process.thread.name": "boundedElastic-10",
-    "traceId": "1d8a53fa89227cab1459249dc278e8d3",
-    "spanId": "996d4985a9e5821d"
-  }
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
+    "process": {
+      "values": [
+        {
+          "key": "pid",
+          "value": {
+            "doubleValue": 1
+          }
+        },
+        {
+          "key": "thread",
+          "value": {
+            "kvlistValue": {
+              "values": [
+                {
+                  "key": "name",
+                  "value": {
+                    "stringValue": "boundedElastic-10"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "spanId": "996d4985a9e5821d",
+    "traceId": "1d8a53fa89227cab1459249dc278e8d3"
+  },
+  "message": "{\"request\": {\"uri\": \"https://192.198.47.113:40504/actuator/health/readiness\", \"payload\": {}}, \"response\": {\"code\": \"200 OK\", \"payload\": {}}}"
 }

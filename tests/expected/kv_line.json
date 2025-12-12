@@ -1,28 +1,55 @@
 {
-  "message": "livenessProbe returned liveness all OK",
   "attributes": {
-    "container_name": "kv-container",
+    "app": "/usr/sbin/livenessProbe",
+    "host": "decoder-657bfb768-7qgjv",
+    "k8s": {
+      "values": [
+        {
+          "key": "namespace",
+          "value": {
+            "stringValue": "demo-ns"
+          }
+        },
+        {
+          "key": "pod_name",
+          "value": {
+            "stringValue": "kv-pod"
+          }
+        },
+        {
+          "key": "pod_uid",
+          "value": {
+            "stringValue": "1111"
+          }
+        },
+        {
+          "key": "container_name",
+          "value": {
+            "stringValue": "kv-container"
+          }
+        },
+        {
+          "key": "restart_count",
+          "value": {
+            "stringValue": "0"
+          }
+        }
+      ]
+    },
+    "k8s.container.name": "kv-container",
     "k8s.container.restart_count": "0",
+    "k8s.namespace.name": "demo-ns",
+    "k8s.pod.name": "kv-pod",
     "k8s.pod.uid": "1111",
     "log.file.name": "0.log",
     "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/kv-container/0.log",
-    "namespace": "demo-ns",
-    "otelcol_jsonparsed": false,
-    "otelcol_multilined": false,
-    "otelcol_prefixremoved": true,
-    "otelcol_uidextracted": true,
     "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-    "pod_name": "kv-pod",
-    "k8s.namespace.name": "demo-ns",
-    "k8s.pod.name": "kv-pod",
-    "k8s.container.name": "kv-container",
-    "ts": "2025-12-12T09:38:51.227",
-    "sev": "INFO",
-    "host": "decoder-657bfb768-7qgjv",
-    "ver": "jbv53-rel-0.77.0-20251112194502",
-    "app": "/usr/sbin/livenessProbe",
     "pid": "1615380",
+    "sev": "INFO",
+    "src": "/usr/sbin/livenessProbe:11",
     "tid": "0",
-    "src": "/usr/sbin/livenessProbe:11"
-  }
+    "ts": "2025-12-12T09:38:51.227",
+    "ver": "jbv53-rel-0.77.0-20251112194502"
+  },
+  "message": "ts=2025-12-12T09:38:51.227; sev=INFO   ; host=decoder-657bfb768-7qgjv; ver=jbv53-rel-0.77.0-20251112194502; app=/usr/sbin/livenessProbe; pid=1615380; tid=0; src=/usr/sbin/livenessProbe:11; msg=\"livenessProbe returned liveness all OK\""
 }
