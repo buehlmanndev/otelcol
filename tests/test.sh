@@ -26,7 +26,7 @@ compose_down() {
 }
 
 emit_logs() {
-  docker compose -f "$COMPOSE_FILE" logs --no-color || true
+  docker compose -f "$COMPOSE_FILE" logs --no-color otelcol || true
 }
 
 cleanup() {
