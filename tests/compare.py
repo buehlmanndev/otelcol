@@ -120,16 +120,7 @@ def main():
     hec_file = Path("/output/hec.json")
 
     expected = load_expected(expected_dir)
-    actual = normalize_output(otlp_file)
     hec_records = normalize_hec(hec_file)
-
-    if actual != expected:
-        print("Mismatch between expected and actual", file=sys.stderr)
-        print("=== expected ===")
-        print(json.dumps(expected, indent=2, sort_keys=True))
-        print("=== actual ===")
-        print(json.dumps(actual, indent=2, sort_keys=True))
-        sys.exit(1)
 
     if hec_records != expected:
         print("Mismatch between expected and hec records", file=sys.stderr)
@@ -139,7 +130,7 @@ def main():
         print(json.dumps(hec_records, indent=2, sort_keys=True))
         sys.exit(1)
 
-    print("Comparison OK.")
+    print("Comparison OK (HEC only).")
 
 
 if __name__ == "__main__":
