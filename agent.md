@@ -17,6 +17,7 @@ Unterstuetzte Log-Formate:
 - **Gute Praxis**: Nutze Router + klar getrennte Pipelines; entferne Container-Metadaten; halte Body als reine Message, Attribute als Felder; keine unnoetigen Dateien im Repo; Dokumentation kurz und verfuegbar (README, tests/README, collector/README).
 - **Systemunabhaengig testen**: Vergleiche werden in Containern ausgefuehrt (Python-Slim), keine lokalen Tools wie `jq` noetig; Container-Logs muessen immer sichtbar sein.
 - **Keine Inline-Skripte**: Hilfslogik fuer Tests (Parsing/Compare) liegt in eigenen Files (z.B. `tests/compare.py`), nicht als Inline-Heredoc in Shell-Skripten.
+- **Stabile, robuste Abhaengigkeiten**: Images versionieren (Collector, MockServer), Healthchecks/Depends-On fuer Mocks und API-basierte Assertions (MockServer statt Eigenbau), Aushaengepunkte fuer Payload-Retrieval in Tests.
 
 ## Erwartetes Ergebnis
 - Eine vollstaendig definierte Operator-Chain pro Log-Typ

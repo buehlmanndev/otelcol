@@ -2,6 +2,7 @@ import json
 import sys
 from pathlib import Path
 from typing import List, Dict, Any
+import base64
 
 
 def normalize_output(path: Path) -> List[Dict[str, Any]]:
@@ -49,19 +50,52 @@ def load_expected(dir_path: Path) -> List[Dict[str, Any]]:
 
 
 def normalize_hec(path: Path) -> List[Dict[str, Any]]:
+    text = path.read_text()
     records = []
-    for line in path.read_text().splitlines():
-        if not line.strip():
+    try:
+        payloads = json.loads(text)
+    except Exception:
+        payloads = []
+    for entry in payloads:
+        body = entry.get("body", {})
+        raw_string = body.get("rawString")
+        raw_bytes = body.get("rawBytes")
+        json_body = body.get("json")
+
+        if raw_bytes:
+            try:
+                decoded = base64.b64decode(raw_bytes).decode("utf-8", errors="replace")
+                chunks = decoded.replace("}{", "}|{").split("|")
+                for chunk in chunks:
+                    try:
+                        obj = json.loads(chunk)
+                        records.append({"message": obj.get("event"), "attributes": obj.get("fields", {})})
+                    except Exception:
+                        records.append({"message": None, "attributes": {"raw": chunk}})
+            except Exception:
+                records.append({"message": None, "attributes": {"raw": raw_bytes}})
             continue
-        obj = json.loads(line)
-        records.append({"message": obj.get("event"), "attributes": obj.get("fields", {})})
+
+        if raw_string:
+            chunks = raw_string.replace("}{", "}|{").split("|")
+            for chunk in chunks:
+                try:
+                    obj = json.loads(chunk)
+                    records.append({"message": obj.get("event"), "attributes": obj.get("fields", {})})
+                except Exception:
+                    records.append({"message": None, "attributes": {"raw": chunk}})
+            continue
+
+        if json_body:
+            records.append({"message": json_body.get("event"), "attributes": json_body.get("fields", {})})
+
     return sorted(records, key=lambda x: x.get("message") or "")
 
 
 def main():
     expected_dir = Path("/expected")
     otlp_file = Path("/output/logs.json")
-    hec_file = Path("/output/hec.ndjson")
+    hec_file = Path("/output/hec.json")
 
     expected = load_expected(expected_dir)
     actual = normalize_output(otlp_file)
