@@ -12,7 +12,16 @@ services:
     environment:
       - SPLUNK_HEC_URL=http://hec-mock:1080/services/collector
       - SPLUNK_HEC_TOKEN=changeme
+    networks:
+      - otelcol_net
   hec-mock:
     image: mockserver/mockserver:5.15.0
     ports:
       - "1080:1080"
+    networks:
+      - otelcol_net
+
+networks:
+  otelcol_net:
+    name: otelcol_net
+    driver: bridge
