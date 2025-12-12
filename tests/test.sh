@@ -30,7 +30,7 @@ emit_logs() {
 }
 
 cleanup() {
-  #emit_logs
+  emit_logs
   compose_down
 }
 trap cleanup EXIT

@@ -66,6 +66,7 @@ receivers:
         parse_from: body
         parse_to: attributes
         regex: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\s+-\s+(?P<log_level>[A-Z]+)\s'
+        if: 'body matches "^\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\.\\d+\\s+-\\s+[A-Z]{1,5}\\s"'
         error_mode: continue
         output: move_plain_level
 
