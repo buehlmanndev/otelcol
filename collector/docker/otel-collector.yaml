@@ -82,6 +82,15 @@ receivers:
         regex: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+\s+-\s+(?P<log_level>[A-Z]+)\s'
         if: 'body matches "^\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\.\\d+\\s+-\\s+[A-Z]{1,5}\\s"'
         error_mode: continue
+        output: parse_apache_logs
+
+      - id: parse_apache_logs
+        type: regex_parser
+        parse_from: body
+        parse_to: attributes
+        regex: '(?:\[[^:\]]+:|sev=)(?P<log_level>[A-Za-z]+)'
+        if: 'attributes.log_level == nil && (body matches "\\[[^:\\]]+:[A-Za-z]+" or body matches "sev=[A-Za-z]+")'
+        error_mode: continue
         output: move_plain_level
 
       - id: move_plain_level

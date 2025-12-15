@@ -30,6 +30,8 @@ emit_logs() {
 }
 
 cleanup() {
+  echo
+  echo "==== otelcol logs ===="
   emit_logs
   compose_down
 }
@@ -117,4 +119,5 @@ docker run --rm \
   python:3.12.7-slim \
   python /work/compare.py
 
+echo
 echo "All tests passed."
