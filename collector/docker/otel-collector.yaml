@@ -19,6 +19,22 @@ receivers:
         format: containerd
         add_metadata_from_filepath: true
 
+      # Combine multiline plain logs until the next application timestamp/level/structured line
+      - id: multiline_recombine
+        type: recombine
+        combine_field: body
+        combine_with: "\n"
+        max_log_size: 10MiB
+        source_identifier: attributes["log.file.path"]
+        is_first_entry: |
+          body matches "^(?:ts=)?\\d{4}-\\d{2}-\\d{2}" or
+          body matches "^\\{" or
+          body matches "^[IWE]\\d{4}"
+        if: 'not (body matches "^\\s*\\{")'
+        force_flush_period: 1s
+        error_mode: continue
+        output: parse_pod_path
+
       # Derive k8s metadata from file path
       - id: parse_pod_path
         type: regex_parser

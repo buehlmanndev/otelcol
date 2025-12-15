@@ -81,6 +81,9 @@ if [ ! -s "$OUTPUT_FILE" ]; then
   exit 1
 fi
 
+# Give the collector a brief moment to flush all HEC batches
+sleep 2
+
 # Retrieve HEC requests from mockserver
 if ! retry_curl "http://localhost:1080/mockserver/retrieve" '{
   "httpRequest": { "path": "/services/collector" },
