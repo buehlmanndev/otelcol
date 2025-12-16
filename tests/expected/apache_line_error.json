@@ -1,14 +1,14 @@
 {
-    "attributes": {
-      "k8s.container.name": "apache-container",
-      "k8s.container.restart_count": "0",
-      "k8s.namespace.name": "demo-ns",
-      "k8s.pod.name": "kv-pod",
-      "k8s.pod.uid": "1111",
-      "log.file.name": "0.log",
-      "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/apache-container/0.log",
-      "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-      "log.level": "error"
-    },
-    "message": "[Fri Dec 12 14:55:04.520956 2025] [ssl:error] [pid 30:tid 127] [client 10.186.16.12:58412] AH01964: Connection to child 20 established (server 10.224.47.73:30538)"
-  }
+  "attributes": {
+    "k8s.container.name": "apache-container",
+    "k8s.container.restart_count": "0",
+    "k8s.namespace.name": "demo-ns",
+    "k8s.pod.name": "kv-pod",
+    "k8s.pod.uid": "1111",
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/apache-container/0.log",
+    "log.level": "error",
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z"
+  },
+  "message": "[Fri Dec 12 14:55:04.520956 2025] [ssl:error] [pid 30:tid 127] [client 10.186.16.12:58412] AH01964: Connection to child 20 established (server 10.224.47.73:30538)"
+}

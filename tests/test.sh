@@ -7,6 +7,7 @@ EXPECTED_DIR="$ROOT_DIR/tests/expected"
 OUTPUT_DIR="$ROOT_DIR/tests/output"
 OUTPUT_FILE="$OUTPUT_DIR/logs.json"
 HEC_RETRIEVE="$OUTPUT_DIR/hec.json"
+RESULTS_DIR="$OUTPUT_DIR/results"
 
 # Dependency checks
 command -v docker >/dev/null 2>&1 || { echo "docker not found" >&2; exit 1; }
@@ -20,6 +21,8 @@ mkdir -p "$OUTPUT_DIR"
 chmod 0777 "$OUTPUT_DIR"
 rm -f "$OUTPUT_FILE"
 rm -f "$HEC_RETRIEVE"
+rm -rf "$RESULTS_DIR"
+mkdir -p "$RESULTS_DIR"
 
 compose_down() {
   docker compose -f "$COMPOSE_FILE" down -v --remove-orphans >/dev/null 2>&1 || true
@@ -30,6 +33,7 @@ emit_logs() {
 }
 
 cleanup() {
+  echo
   echo
   echo "==== otelcol logs ===="
   emit_logs
@@ -108,13 +112,15 @@ if [ ! -s "$HEC_RETRIEVE" ]; then
   exit 1
 fi
 
+echo
+echo
+
 ACTUAL_TMP="$(mktemp)"
 EXPECTED_TMP="$(mktemp)"
 
 docker run --rm \
   -v "$EXPECTED_DIR":/expected:ro \
-  -v "$OUTPUT_FILE":/output/logs.json:ro \
-  -v "$HEC_RETRIEVE":/output/hec.json:ro \
+  -v "$OUTPUT_DIR":/output:rw \
   -v "$ROOT_DIR/tests/compare.py":/work/compare.py:ro \
   python:3.12.7-slim \
   python /work/compare.py

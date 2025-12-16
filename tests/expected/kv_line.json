@@ -1,15 +1,14 @@
-
-  {
-    "attributes": {
-      "k8s.container.name": "kv-container",
-      "k8s.container.restart_count": "0",
-      "k8s.namespace.name": "demo-ns",
-      "k8s.pod.name": "kv-pod",
-      "k8s.pod.uid": "1111",
-      "log.file.name": "0.log",
-      "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/kv-container/0.log",
-      "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-      "log.level": "INFO"
-    },
-    "message": "ts=2025-12-12T09:38:51.227; sev=INFO   ; host=decoder-657bfb768-7qgjv; ver=jbv53-rel-0.77.0-20251112194502; app=/usr/sbin/livenessProbe; pid=1615380; tid=0; src=/usr/sbin/livenessProbe:11; msg=\"livenessProbe returned liveness all OK\""
-  }
+{
+  "attributes": {
+    "k8s.container.name": "kv-container",
+    "k8s.container.restart_count": "0",
+    "k8s.namespace.name": "demo-ns",
+    "k8s.pod.name": "kv-pod",
+    "k8s.pod.uid": "1111",
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/kv-container/0.log",
+    "log.level": "INFO",
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z"
+  },
+  "message": "ts=2025-12-12T09:38:51.227; sev=INFO   ; host=decoder-657bfb768-7qgjv; ver=jbv53-rel-0.77.0-20251112194502; app=/usr/sbin/livenessProbe; pid=1615380; tid=0; src=/usr/sbin/livenessProbe:11; msg=\"livenessProbe returned liveness all OK\""
+}
