@@ -2,7 +2,6 @@
   {
     "attributes": {
       "@timestamp": "2025-12-12T07:22:59.055427052Z",
-      "container_name": "ecs-container",
       "k8s.container.name": "ecs-container",
       "k8s.container.restart_count": "0",
       "k8s.namespace.name": "demo-ns",
@@ -12,13 +11,9 @@
       "log.file.path": "/var/log/pods/demo-ns_ecs-pod_3333/ecs-container/0.log",
       "log.level": "TRACE",
       "log.logger": "ch.company.application.commons.payload.logging.webflux.PayloadLoggingWebfluxFilter",
-      "namespace": "demo-ns",
       "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-      "pod_name": "ecs-pod",
-      "pod_uid": "3333",
       "process.pid": 1,
       "process.thread.name": "boundedElastic-10",
-      "restart_count": "0",
       "spanId": "996d4985a9e5821d",
       "traceId": "1d8a53fa89227cab1459249dc278e8d3"
     },

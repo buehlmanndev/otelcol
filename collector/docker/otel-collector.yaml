@@ -13,20 +13,12 @@ receivers:
         regex: '^(?P<paas_time_utc>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)'
         error_mode: continue
 
-      # Strip containerd envelope and keep filepath metadata
+      # Strip containerd envelope and keep k8s filepath metadata
       - id: container_cri
         type: container
         format: containerd
         add_metadata_from_filepath: true
-
-      # Derive k8s metadata from file path
-      - id: parse_pod_path
-        type: regex_parser
-        parse_from: attributes["log.file.path"]
-        parse_to: attributes
-        regex: '^/var/log/pods/(?P<namespace>[^_]+)_(?P<pod_name>[^_]+)_(?P<pod_uid>[^/]+)/(?P<container_name>[^._]+)/(?P<restart_count>\d+)\.log$'
-        error_mode: continue
-
+        
       # Route by structure: JSON vs KV
       - id: log_router
         type: router

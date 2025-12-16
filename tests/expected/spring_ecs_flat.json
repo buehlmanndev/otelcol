@@ -1,7 +1,6 @@
   {
     "attributes": {
       "@timestamp": "2025-12-12T08:30:57.307474611Z",
-      "container_name": "spring-container",
       "ecs.version": "8.11",
       "k8s.container.name": "spring-container",
       "k8s.container.restart_count": "0",
@@ -12,13 +11,9 @@
       "log.file.path": "/var/log/pods/demo-ns_spring-pod_2222/spring-container/0.log",
       "log.level": "INFO",
       "log.logger": "ch.company.modules.enricher.Enricher",
-      "namespace": "demo-ns",
       "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-      "pod_name": "spring-pod",
-      "pod_uid": "2222",
       "process.pid": 1,
       "process.thread.name": "org.springframework.kafka.KafkaListenerEndpointContainer#1-0-C-1",
-      "restart_count": "0",
       "service.version": "1.77.1-SNAPSHOT",
       "spanId": "b7e103b8ce906a2d",
       "traceId": "a51b16cbc1785473baf33a86d84af7b5"
