@@ -59,7 +59,7 @@ receivers:
         output: cleanup_logtag
         error_mode: continue
 
-      # Combine multiline plain logs until the next application timestamp/level/structured line
+      # Combine multiline plain logs until the next application timestamp/level/structured line (supports ISC-EJPD Spring & Cpp format, Json and glog/klog-Format)
       - id: multiline_recombine
         type: recombine
         combine_field: body

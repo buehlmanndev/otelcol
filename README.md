@@ -16,9 +16,11 @@ Zielmodell:
 - Alle Metadaten als Attributes/Fields
 
 ## Unterstuetzte Log-Formate
-1. Key-Value Line Logs
-2. Spring Boot ECS-like Logs, nicht nested
-3. Vollstaendig ECS-kompatible, nested Logs
+1. Key-Value Line Logs (z. B. `ts=...; sev=INFO; ...`) – Level wird aus `sev=` via Regex geparsed.
+2. Plain Spring Boot Logs (mehrzeilig) – Timestamp + `- LEVEL` am Zeilenanfang, Level aus dem Prefix.
+3. Apache HTTPD Log-Style – Timestamp gefolgt von `[...][ssl:<level>]...`, Level aus dem `[mod:<level>]` Block.
+4. Spring Boot ECS-like Logs, nicht nested
+5. Vollstaendig ECS-kompatible, nested Logs
 
 Jeder Log-Typ wird isoliert getestet.
 
@@ -65,10 +67,18 @@ Jeder Log-Typ wird isoliert getestet.
 - Keine versteckte Logik
 
 ## Aktueller Pipeline-Stand (docker/otel-collector.yaml)
-- `receiver.filelog`: container parser (containerd) -> router (strukturbasiert: JSON vs. KV) -> branch-spezifische Parser -> gemeinsame Cleanup-Phase (Removal von Container-Metadaten).
+- `receiver.filelog`: container parser (containerd) -> router (strukturbasiert: JSON vs. KV/plain) -> branch-spezifische Parser -> gemeinsame Cleanup-Phase (Removal von Container-Metadaten).
 - `exporter.file`: schreibt nach `/output/logs.json` (gemountet auf `tests/output/logs.json`).
 - `exporter.splunk_hec`: sendet an HEC-Mock (http://hec-mock:8088/services/collector).
 - `processor.batch`: Standard-Batching.
+
+### Parsing-Details (plain/KV)
+- Multiline-Recombine erkennt neue Eintraege via Timestamp, JSON-Start oder GKE-Style `IWE` Prefix.
+- Level-Erkennung:
+  - Plain Spring: Regex auf `YYYY-MM-DD HH:MM:SS.mmm - LEVEL`.
+- Apache: Regex auf `[...]` Blocks mit `mod:<level>` (z. B. `[ssl:warn]`).
+  - KV: Regex auf `sev=<LEVEL>` falls noch kein Level gesetzt.
+- Gefundene Level werden nach `attributes["log.level"]` verschoben.
 
 ## Naechste Schritte
 1. Optional: Ressource-Attribute anreichern (k8s metadata) und in HEC-Tests reflektieren.
