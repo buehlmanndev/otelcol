@@ -173,6 +173,14 @@ def main():
             print(f"{GREEN}PASS{RESET} {filename}")
             pass_count += 1
 
+    # Persist any additional actual records that had no matching expectation for easier inspection
+    if len(act_sorted) > len(exp_sorted):
+        extra_start = len(exp_sorted)
+        for extra_idx, act_item in enumerate(act_sorted[extra_start:], start=1):
+            out_path = results_dir / f"extra_{extra_idx}.actual.json"
+            out_path.write_text(json.dumps(act_item, indent=2, sort_keys=True))
+        print(f"{RED}Extra actual records written:{RESET} {len(act_sorted) - len(exp_sorted)} (see {results_dir})", file=sys.stderr)
+
     if not status_ok:
         print(f"\nSummary: {pass_count} passed, {fail_count} failed.", file=sys.stderr)
         print(f"Actual results saved under {results_dir}", file=sys.stderr)
