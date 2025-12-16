@@ -48,6 +48,13 @@ receivers:
         from: attributes.log.level
         to: attributes["log.level"]
         if: 'attributes.log != nil && attributes.log.level != nil'
+        output: json_add_operator_tag
+        error_mode: continue
+
+      - id: json_add_operator_tag
+        type: add
+        field: attributes["otel.operator.type"]
+        value: JSON
         output: cleanup_logtag
         error_mode: continue
 
@@ -99,7 +106,14 @@ receivers:
         to: attributes["log.level"]
         if: attributes.log_level != nil
         error_mode: continue
+        output: multiline_add_operator_tag
+
+      - id: multiline_add_operator_tag
+        type: add
+        field: attributes["otel.operator.type"]
+        value: MULTILINE
         output: cleanup_logtag
+        error_mode: continue
 
       # Minimal cleanup: remove helper fields
       - id: cleanup_logtag

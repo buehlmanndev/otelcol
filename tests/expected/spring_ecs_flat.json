@@ -16,7 +16,8 @@
     "process.thread.name": "org.springframework.kafka.KafkaListenerEndpointContainer#1-0-C-1",
     "service.version": "1.77.1-SNAPSHOT",
     "spanId": "b7e103b8ce906a2d",
-    "traceId": "a51b16cbc1785473baf33a86d84af7b5"
+    "traceId": "a51b16cbc1785473baf33a86d84af7b5",
+    "otel.operator.type": "JSON"
   },
   "message": "Starting product enrichment - product_id=16350"
 }

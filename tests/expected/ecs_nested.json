@@ -14,7 +14,8 @@
     "process.pid": 1,
     "process.thread.name": "boundedElastic-10",
     "spanId": "996d4985a9e5821d",
-    "traceId": "1d8a53fa89227cab1459249dc278e8d3"
+    "traceId": "1d8a53fa89227cab1459249dc278e8d3",
+    "otel.operator.type": "JSON"
   },
   "message": "{\"request\": {\"uri\": \"https://192.198.47.113:40504/actuator/health/readiness\", \"payload\": {}}, \"response\": {\"code\": \"200 OK\", \"payload\": {}}}"
 }

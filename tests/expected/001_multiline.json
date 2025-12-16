@@ -8,7 +8,8 @@
     "log.file.name": "1.log",
     "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/multiline-container/1.log",
     "log.level": "WARN",
-    "paas_time_utc": "2025-10-13T18:56:09.672485147Z"
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
+    "otel.operator.type": "MULTILINE"
   },
   "message": "2025-12-02 21:28:23.683 - WARN 1 --- [] [   scheduling-1] o.s.b.a.health.HealthEndpointSupport     - Health contributor org.springframework.boot.actuate.jdbc.DataSourceHealthIndicator (db) took 30015ms to respond"
 }

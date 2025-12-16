@@ -7,7 +7,8 @@
     "k8s.pod.uid": "1111",
     "log.file.name": "0.log",
     "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/apache-container/0.log",
-    "paas_time_utc": "2025-10-13T18:56:09.672485147Z"
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
+    "otel.operator.type": "MULTILINE"
   },
   "message": "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb.gif HTTP/1.0\" 200 2326"
 }
