@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "k8s.container.name": "apache-container",
+    "k8s.container.restart_count": "0",
+    "k8s.namespace.name": "demo-ns",
+    "k8s.pod.name": "kv-pod",
+    "k8s.pod.uid": "1111",
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/apache-container/0.log",
+    "paas_time_utc": "2025-10-13T18:56:09.672485147Z"
+  },
+  "message": "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb.gif HTTP/1.0\" 200 2326 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\""
+}
