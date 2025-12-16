@@ -8,8 +8,8 @@
     "log.file.name": "0.log",
     "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/apache-container/0.log",
     "log.level": "warn",
-    "paas_time_utc": "2025-10-13T18:56:09.672485147Z",
-    "otel.operator.type": "MULTILINE"
+    "otel.operator.type": "MULTILINE",
+    "paas_time_utc": "2025-10-13T18:56:10.672485147Z"
   },
   "message": "[Fri Dec 12 14:55:04.520956 2025] [ssl:warn] [pid 30:tid 127] [client 10.186.16.12:58412] AH01964: Connection to child 20 established (server 10.224.47.73:30538)"
 }
