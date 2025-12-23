@@ -58,7 +58,8 @@ receivers:
       # - Json Format (should be normally directly interpreted as JSON and not end up here),
       # - glog/klog-Format,
       # - Apache Error Log Format,
-      # - Apache Access Log Format
+      # - Apache Access Log Format,
+      # - https://github.com/camptocamp/docker-swisstopo-light-basemap format
       - id: multiline_recombine
         type: recombine
         combine_field: body
@@ -70,7 +71,8 @@ receivers:
           body matches "^\\{" or
           body matches "^[IWE]\\d{4}" or
           body matches "^\\[[A-Za-z]{3}\\s+[A-Za-z]{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?\\s+\\d{4}\\]" or
-          body matches "^\\d{1,3}(?:\\.\\d{1,3}){3}\\s+"
+          body matches "^\\d{1,3}(?:\\.\\d{1,3}){3}\\s+" or
+          body matches "^\\[Build_"
         force_flush_period: 1s
         output: parse_plain_level
 

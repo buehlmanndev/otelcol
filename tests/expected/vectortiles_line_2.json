@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "k8s.container.name": "vectortiles-container",
+    "k8s.container.restart_count": "0",
+    "k8s.namespace.name": "demo-ns",
+    "k8s.pod.name": "kv-pod",
+    "k8s.pod.uid": "1111",
+    "log.file.name": "0.log",
+    "log.file.path": "/var/log/pods/demo-ns_kv-pod_1111/vectortiles-container/0.log",
+    "otel.operator.type": "MULTILINE",
+    "paas_time_utc": "2025-10-13T18:56:35.672485147Z"
+  },
+  "message": "[Build_2025-12-21] 10.0.0.7 - - [23/Dec/2025:09:55:02 +0000] \"GET /tiles/pbf/relief/11/1070/719.pbf HTTP/1.1\" 200 16298 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0\" \"10.6.4.3\""
+}
